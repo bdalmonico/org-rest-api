@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -30,13 +29,13 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@Path("/proyecto")
+@Path("/estado")
 //Singleton
-public class ProyectoResource {
+public class EstadoResource {
 
 	private ProyectoService proyectoService = null;
 
-	public ProyectoResource() {
+	public EstadoResource() {
 		try {
 			proyectoService = new ProyectoServiceImpl();
 			System.out.println("Servicio instanciado");
@@ -197,29 +196,5 @@ public class ProyectoResource {
 	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
 	    }
 	}
-	
 
-	@DELETE
-	@Path("/del/{id}")
-	public Response DeleteById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-		try {
-			proyectoService.delete(id);
-			return Response.ok().build();
-		} catch (Throwable e) {
-
-			e.printStackTrace();
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Producto " + id + " no encontrado").build();
-		}
-		
-	}
-
-	
-	
-
-	
-	
-	
-	
-	
-	
 }
