@@ -17,12 +17,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.bruno.org.dao.DataException;
+import com.bruno.org.model.EmpleadoCriteria;
+import com.bruno.org.model.EmpleadoDTO;
 import com.bruno.org.model.ProyectoCriteria;
 import com.bruno.org.model.ProyectoDTO;
 import com.bruno.org.model.Results;
-import com.bruno.org.service.ProyectoService;
+import com.bruno.org.service.EmpleadoService;
 import com.bruno.org.service.ServiceException;
-import com.bruno.org.service.impl.ProyectoServiceImpl;
+import com.bruno.org.service.impl.EmpleadoServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,11 +35,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 //Singleton
 public class EmpleadoResource {
 
-	private ProyectoService proyectoService = null;
+	private EmpleadoService empleadoService = null;
 
 	public EmpleadoResource() {
 		try {
-			proyectoService = new ProyectoServiceImpl();
+			empleadoService = new EmpleadoServiceImpl();
 			System.out.println("Servicio instanciado");
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -55,7 +57,7 @@ public class EmpleadoResource {
 					   description="Proyecto encontrado",
 					   content=@Content(
 							   	mediaType=MediaType.APPLICATION_JSON,
-							   	schema=@Schema(implementation=ProyectoDTO.class)
+							   	schema=@Schema(implementation=EmpleadoDTO.class)
 							   )
 					   ),
 			   @ApiResponse(
@@ -69,9 +71,9 @@ public class EmpleadoResource {
 	   }
 )	
 	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-		ProyectoDTO p = null;
+		EmpleadoDTO p = null;
 		try {
-			p = proyectoService.findById(id);
+			p = empleadoService.findById(id);
 		} catch (Throwable e) {
 
 			e.printStackTrace();
@@ -79,63 +81,36 @@ public class EmpleadoResource {
 		if (p != null) {
 			return Response.ok(p).build();
 		} else {
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Producto " + id + " no encontrado").build();
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Empleado " + id + " no encontrado").build();
 		}
 
 	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
-			@QueryParam("estadoId") Long estadoId, @QueryParam("clienteId") Long clienteId,
-			@QueryParam("clienteNombre") String clienteNombre,
-			@QueryParam("fechaEstimadaInicio") String fechaEstimadaInicio2,
-			@QueryParam("fechaEstimadaFin") String fechaEstimadaFin2,
-			@QueryParam("fechaRealInicio") String fechaRealInicio2, @QueryParam("fechaRealFin") String fechaRealfin2,
-			@QueryParam("importe") Double importe) {
+	public Response getBy(
+			@QueryParam("nombre") String nombre,
+			@QueryParam("apellido") String apellido,
+			@QueryParam("email") String email,
+			@QueryParam("fechaEstimadaInicio") String fechaAlta2,
+			@QueryParam("rolId") Integer rolId) {
 		try {
 //			// Criteria... 
-			ProyectoCriteria criteria = new ProyectoCriteria();
+			EmpleadoCriteria criteria = new EmpleadoCriteria();
 			criteria.setNombre(nombre);
-			criteria.setDescripcion(descripcion);
-			criteria.setEstadoId(estadoId);
-			criteria.setClienteId(clienteId);
-			criteria.setClienteNombre(clienteNombre);
-			criteria.setImporte(importe);
-
-			Date fechaEstimadaInicio = null;
-			if (fechaEstimadaInicio2 != null) {
+			criteria.setEmail(email);
+			criteria.setApellido(apellido);
+			criteria.setRolId(rolId);
+			
+			Date fechaAlta = null;
+			if (fechaAlta2 != null) {
 				// Converter a String para Date
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
+				fechaAlta = sdf.parse(fechaAlta2);
 			}
-			criteria.setFechaEstimadaInicio(fechaEstimadaInicio);
+			criteria.setFechaAlta(fechaAlta);
 
-			Date fechaEstimadaFin = null;
-			if (fechaEstimadaFin2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaFin = sdf.parse(fechaEstimadaFin2);
-			}
-			criteria.setFechaEstimadaFin(fechaEstimadaFin);
-
-			Date fechaRealInicio = null;
-			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
-			}
-			criteria.setFechaRealInicio(fechaRealInicio);
-
-			Date fechaRealFin = null;
-			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
-			}
-			criteria.setFechaRealFin(fechaRealFin);
-
-			Results<ProyectoDTO> resultados = proyectoService.findByCriteria(criteria, 1, 30);
+			Results<EmpleadoDTO> resultados = empleadoService.findByCriteria(criteria, 1, 30);
 
 			return Response.ok(resultados).build();
 		} catch (Exception e) {
@@ -188,7 +163,7 @@ public class EmpleadoResource {
 	            proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
 	        }
 
-	        proyectoService.registrar(proyecto);
+	        empleadoService.registrar(proyecto);
 
 	        return Response.status(Response.Status.CREATED).build();
 	    } catch (Exception e) {

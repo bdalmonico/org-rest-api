@@ -4,7 +4,7 @@
     <p><a href="webapi/myresource">Jersey resource</a>
     <p>Visit <a href="http://jersey.java.net">Project Jersey website</a>
     for more information on Jersey!
-     
+     <!-- 
     <h2>CREAR Projeto</h2>
     <form action="${pageContext.request.contextPath}/v1/proyecto" method="post">
           
@@ -40,6 +40,6 @@
 
         <input type="submit" value="Criar Projeto">
     </form>
-        
+ -->        
 </body>
 </html>

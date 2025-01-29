@@ -1,7 +1,6 @@
 package com.bruno.rest.api;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -9,20 +8,17 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.bruno.org.dao.DataException;
-import com.bruno.org.model.ProyectoCriteria;
-import com.bruno.org.model.ProyectoDTO;
+import com.bruno.org.model.ComentarioProyectoDTO;
 import com.bruno.org.model.Results;
-import com.bruno.org.service.ProyectoService;
+import com.bruno.org.service.ComentarioProyectoService;
 import com.bruno.org.service.ServiceException;
-import com.bruno.org.service.impl.ProyectoServiceImpl;
+import com.bruno.org.service.impl.ComentarioProyectoServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,11 +29,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 //Singleton
 public class ComentarioProyectoResource {
 
-	private ProyectoService proyectoService = null;
+	private ComentarioProyectoService comentarioProyectoService = null;
 
 	public ComentarioProyectoResource() {
 		try {
-			proyectoService = new ProyectoServiceImpl();
+			comentarioProyectoService = new ComentarioProyectoServiceImpl();
 			System.out.println("Servicio instanciado");
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -55,7 +51,7 @@ public class ComentarioProyectoResource {
 					   description="Proyecto encontrado",
 					   content=@Content(
 							   	mediaType=MediaType.APPLICATION_JSON,
-							   	schema=@Schema(implementation=ProyectoDTO.class)
+							   	schema=@Schema(implementation=ComentarioProyectoDTO.class)
 							   )
 					   ),
 			   @ApiResponse(
@@ -69,9 +65,9 @@ public class ComentarioProyectoResource {
 	   }
 )	
 	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-		ProyectoDTO p = null;
+		ComentarioProyectoDTO p = null;
 		try {
-			p = proyectoService.findById(id);
+			p = comentarioProyectoService.findById(id);
 		} catch (Throwable e) {
 
 			e.printStackTrace();
@@ -83,64 +79,23 @@ public class ComentarioProyectoResource {
 		}
 
 	}
-
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
-			@QueryParam("estadoId") Long estadoId, @QueryParam("clienteId") Long clienteId,
-			@QueryParam("clienteNombre") String clienteNombre,
-			@QueryParam("fechaEstimadaInicio") String fechaEstimadaInicio2,
-			@QueryParam("fechaEstimadaFin") String fechaEstimadaFin2,
-			@QueryParam("fechaRealInicio") String fechaRealInicio2, @QueryParam("fechaRealFin") String fechaRealfin2,
-			@QueryParam("importe") Double importe) {
+	
+	@Path("/proyecto/{proyectoId}")
+	@GET  
+	@Produces
+	public Response findByProyecto(@PathParam("proyectoId") Long proyectoId) throws NumberFormatException, DataException, ServiceException {
+		
+		Results<ComentarioProyectoDTO> p = null;
 		try {
-//			// Criteria... 
-			ProyectoCriteria criteria = new ProyectoCriteria();
-			criteria.setNombre(nombre);
-			criteria.setDescripcion(descripcion);
-			criteria.setEstadoId(estadoId);
-			criteria.setClienteId(clienteId);
-			criteria.setClienteNombre(clienteNombre);
-			criteria.setImporte(importe);
+			p= comentarioProyectoService.findByProyecto(proyectoId, 1,20);
+		} catch (Throwable e) {
 
-			Date fechaEstimadaInicio = null;
-			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
-			}
-			criteria.setFechaEstimadaInicio(fechaEstimadaInicio);
-
-			Date fechaEstimadaFin = null;
-			if (fechaEstimadaFin2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaFin = sdf.parse(fechaEstimadaFin2);
-			}
-			criteria.setFechaEstimadaFin(fechaEstimadaFin);
-
-			Date fechaRealInicio = null;
-			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
-			}
-			criteria.setFechaRealInicio(fechaRealInicio);
-
-			Date fechaRealFin = null;
-			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
-			}
-			criteria.setFechaRealFin(fechaRealFin);
-
-			Results<ProyectoDTO> resultados = proyectoService.findByCriteria(criteria, 1, 30);
-
-			return Response.ok(resultados).build();
-		} catch (Exception e) {
-			new WebApplicationException();
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+			e.printStackTrace();
+		}
+		if (p!=null) {
+			return Response.ok(p).build();
+		} else {
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Proyecto " + proyectoId+ " no encontrado").build();
 		}
 
 	}
@@ -149,46 +104,28 @@ public class ComentarioProyectoResource {
 	@Consumes("application/x-www-form-urlencoded")
 	public Response create(MultivaluedMap<String, String> formParams) {
 	    try {
-	        ProyectoDTO proyecto = new ProyectoDTO();
-	        proyecto.setNombre(formParams.getFirst("nombre"));
-	        proyecto.setDescripcion(formParams.getFirst("descripcion"));
-	        
-	        String estadoIdStr = formParams.getFirst("estadoId");
-	        if (estadoIdStr != null) {
-	            proyecto.setEstadoId(Long.parseLong(estadoIdStr));
+	    	ComentarioProyectoDTO comentarioProyecto = new ComentarioProyectoDTO();
+	    	
+	    	comentarioProyecto.setComentario(formParams.getFirst("comentario"));
+	    	
+	    	String empleadoIdStr = formParams.getFirst("empleadoId");
+	        if (empleadoIdStr != null) {
+	            comentarioProyecto.setEmpleadoId(Long.parseLong(empleadoIdStr));
 	        }
-
-	        String clienteIdStr = formParams.getFirst("clienteId");
-	        if (clienteIdStr != null) {
-	            proyecto.setClienteId(Long.parseLong(clienteIdStr));
-	        }
-
-	        proyecto.setClienteNombre(formParams.getFirst("clienteNombre"));
-	        proyecto.setImporte(Double.parseDouble(formParams.getFirst("importe")));
 
 	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	        String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
-	        if (fechaEstimadaInicioStr != null) {
-	            proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
+	        String fechaHoraStr = formParams.getFirst("fechaHora");
+	        if (fechaHoraStr != null) {
+	            comentarioProyecto.setFechaHora(sdf.parse(fechaHoraStr));
 	        }
-
-	        String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
-	        if (fechaEstimadaFinStr != null) {
-	            proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
+	        
+	        String proyectoIdStr = formParams.getFirst("proyectoId");
+	        if (proyectoIdStr != null) {
+	            comentarioProyecto.setProyectoId(Long.parseLong(proyectoIdStr));
 	        }
-
-	        String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
-	        if (fechaRealInicioStr != null) {
-	            proyecto.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
-	        }
-
-	        String fechaRealFinStr = formParams.getFirst("fechaRealFin");
-	        if (fechaRealFinStr != null) {
-	            proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
-	        }
-
-	        proyectoService.registrar(proyecto);
+	        
+	        comentarioProyectoService.comentar(comentarioProyecto);
 
 	        return Response.status(Response.Status.CREATED).build();
 	    } catch (Exception e) {

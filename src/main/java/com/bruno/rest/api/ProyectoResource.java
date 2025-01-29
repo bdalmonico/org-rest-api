@@ -3,6 +3,7 @@ package com.bruno.rest.api;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -84,7 +85,19 @@ public class ProyectoResource {
 		}
 
 	}
-
+	
+	
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response getByCriteria(@BeanParam ProyectoCriteria criteria) {
+		return null;
+		
+	}
+//	
+//	
+//	@POST == @FormParam
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
