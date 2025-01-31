@@ -17,12 +17,12 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.bruno.org.dao.DataException;
-import com.bruno.org.model.ProyectoCriteria;
-import com.bruno.org.model.ProyectoDTO;
+import com.bruno.org.model.ImputacionCriteria;
+import com.bruno.org.model.ImputacionDTO;
 import com.bruno.org.model.Results;
-import com.bruno.org.service.ProyectoService;
+import com.bruno.org.service.ImputacionService;
 import com.bruno.org.service.ServiceException;
-import com.bruno.org.service.impl.ProyectoServiceImpl;
+import com.bruno.org.service.impl.ImputacionServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,11 +33,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 //Singleton
 public class ImputacionResource {
 
-	private ProyectoService proyectoService = null;
+	private ImputacionService imputacionService = null;
 
 	public ImputacionResource() {
 		try {
-			proyectoService = new ProyectoServiceImpl();
+			imputacionService = new ImputacionServiceImpl();
 			System.out.println("Servicio instanciado");
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -47,31 +47,14 @@ public class ImputacionResource {
 	@Path("/{id}")
 	@GET
 	@Produces
-	@Operation(summary="Busqueda por id de proyecto",
-	   description="Recupera todos los datos de un proyecto por su id",
-	   responses= {
-			   @ApiResponse(
-					   responseCode="200", 
-					   description="Proyecto encontrado",
-					   content=@Content(
-							   	mediaType=MediaType.APPLICATION_JSON,
-							   	schema=@Schema(implementation=ProyectoDTO.class)
-							   )
-					   ),
-			   @ApiResponse(
-					   responseCode="404",
-					   description="Libro no encontrado"
-					   ),
-			   @ApiResponse(
-					   responseCode="400",
-					   description="Error al recuperar los datos"
-					   )
-	   }
-)	
+	@Operation(summary = "Busca imputacion por su id", description = "Recupera imputacion por su id", responses = {
+			@ApiResponse(responseCode = "200", description = "Imputacion encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ImputacionDTO.class))),
+			@ApiResponse(responseCode = "404", description = "Imputacion no encontrado"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-		ProyectoDTO p = null;
+		ImputacionDTO p = null;
 		try {
-			p = proyectoService.findById(id);
+			p = imputacionService.findById(id);
 		} catch (Throwable e) {
 
 			e.printStackTrace();
@@ -79,63 +62,36 @@ public class ImputacionResource {
 		if (p != null) {
 			return Response.ok(p).build();
 		} else {
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Producto " + id + " no encontrado").build();
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Imputacion " + id + " no encontrado").build();
 		}
 
 	}
 
+	@Path("/search/criteria")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
-			@QueryParam("estadoId") Long estadoId, @QueryParam("clienteId") Long clienteId,
-			@QueryParam("clienteNombre") String clienteNombre,
-			@QueryParam("fechaEstimadaInicio") String fechaEstimadaInicio2,
-			@QueryParam("fechaEstimadaFin") String fechaEstimadaFin2,
-			@QueryParam("fechaRealInicio") String fechaRealInicio2, @QueryParam("fechaRealFin") String fechaRealfin2,
-			@QueryParam("importe") Double importe) {
+	public Response getByCriteria(@QueryParam("comentario") String comentario,
+			@QueryParam("empleadoId") Long empleadoId, @QueryParam("fechaHora2") String fechaHora2,
+			@QueryParam("horasImputadas") Double horasImputadas, @QueryParam("id") Long id,
+			@QueryParam("proyectoId") Long proyectoId, @QueryParam("tareaId") Long tareaId) {
 		try {
-//			// Criteria... 
-			ProyectoCriteria criteria = new ProyectoCriteria();
-			criteria.setNombre(nombre);
-			criteria.setDescripcion(descripcion);
-			criteria.setEstadoId(estadoId);
-			criteria.setClienteId(clienteId);
-			criteria.setClienteNombre(clienteNombre);
-			criteria.setImporte(importe);
+			ImputacionCriteria criteria = new ImputacionCriteria();
 
-			Date fechaEstimadaInicio = null;
-			if (fechaEstimadaInicio2 != null) {
+			criteria.setComentario(comentario);
+			criteria.setEmpleadoId(empleadoId);
+			criteria.setId(id);
+			criteria.setProyectoId(proyectoId);
+			criteria.setTareaId(tareaId);
+
+			Date fechaHora = null;
+			if (fechaHora2 != null) {
 				// Converter a String para Date
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
+				fechaHora = sdf.parse(fechaHora2);
 			}
-			criteria.setFechaEstimadaInicio(fechaEstimadaInicio);
+			criteria.setFechaHora(fechaHora);
 
-			Date fechaEstimadaFin = null;
-			if (fechaEstimadaFin2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaFin = sdf.parse(fechaEstimadaFin2);
-			}
-			criteria.setFechaEstimadaFin(fechaEstimadaFin);
-
-			Date fechaRealInicio = null;
-			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
-			}
-			criteria.setFechaRealInicio(fechaRealInicio);
-
-			Date fechaRealFin = null;
-			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
-				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
-			}
-			criteria.setFechaRealFin(fechaRealFin);
-
-			Results<ProyectoDTO> resultados = proyectoService.findByCriteria(criteria, 1, 30);
+			Results<ImputacionDTO> resultados = imputacionService.findByCriteria(criteria, 1, 20);
 
 			return Response.ok(resultados).build();
 		} catch (Exception e) {
@@ -144,57 +100,87 @@ public class ImputacionResource {
 		}
 
 	}
-	
+
+	@Path("/search/total")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getTotalByCriteria(@QueryParam("comentario") String comentario,
+			@QueryParam("empleadoId") Long empleadoId, @QueryParam("fechaHora2") String fechaHora2,
+			@QueryParam("horasImputadas") Double horasImputadas, @QueryParam("id") Long id,
+			@QueryParam("proyectoId") Long proyectoId, @QueryParam("tareaId") Long tareaId) {
+		try {
+			ImputacionCriteria criteria = new ImputacionCriteria();
+
+			criteria.setComentario(comentario);
+			criteria.setEmpleadoId(empleadoId);
+			criteria.setId(id);
+			criteria.setProyectoId(proyectoId);
+			criteria.setTareaId(tareaId);
+
+			Date fechaHora = null;
+			if (fechaHora2 != null) {
+				// Converter a String para Date
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
+				fechaHora = sdf.parse(fechaHora2);
+			}
+			criteria.setFechaHora(fechaHora);
+
+			Double resultados = imputacionService.findByTotalByCriteria(criteria);
+
+			return Response.ok(resultados).build();
+		} catch (Exception e) {
+			new WebApplicationException();
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+		}
+
+	}
+
 	@POST
+	@Operation(summary = "Crea una imputacion", description = "Crea una imputacion", responses = {
+			@ApiResponse(responseCode = "200", description = "Imputacion creado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ImputacionDTO.class))),
+			@ApiResponse(responseCode = "404", description = "Imputacion no creado"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
 	public Response create(MultivaluedMap<String, String> formParams) {
-	    try {
-	        ProyectoDTO proyecto = new ProyectoDTO();
-	        proyecto.setNombre(formParams.getFirst("nombre"));
-	        proyecto.setDescripcion(formParams.getFirst("descripcion"));
-	        
-	        String estadoIdStr = formParams.getFirst("estadoId");
-	        if (estadoIdStr != null) {
-	            proyecto.setEstadoId(Long.parseLong(estadoIdStr));
-	        }
+		try {
+			ImputacionDTO imputacion = new ImputacionDTO();
 
-	        String clienteIdStr = formParams.getFirst("clienteId");
-	        if (clienteIdStr != null) {
-	            proyecto.setClienteId(Long.parseLong(clienteIdStr));
-	        }
+			imputacion.setComentario(formParams.getFirst("comentario"));
 
-	        proyecto.setClienteNombre(formParams.getFirst("clienteNombre"));
-	        proyecto.setImporte(Double.parseDouble(formParams.getFirst("importe")));
+			String empleadoIdStr = formParams.getFirst("empleadoId");
+			if (empleadoIdStr != null) {
+				imputacion.setEmpleadoId(Long.parseLong(empleadoIdStr));
+			}
 
-	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	        String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
-	        if (fechaEstimadaInicioStr != null) {
-	            proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
-	        }
+			String fechaHoraStr = formParams.getFirst("fechaHora");
+			if (fechaHoraStr != null) {
+				imputacion.setFechaHora(sdf.parse(fechaHoraStr));
+			}
 
-	        String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
-	        if (fechaEstimadaFinStr != null) {
-	            proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
-	        }
+			String horasImputadasStr = formParams.getFirst("horasImputadas");
+			if (horasImputadasStr != null) {
+				imputacion.setHorasImputadas(Double.parseDouble(horasImputadasStr));
+			}
 
-	        String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
-	        if (fechaRealInicioStr != null) {
-	            proyecto.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
-	        }
+			String proyectoIdStr = formParams.getFirst("proyectoId");
+			if (proyectoIdStr != null) {
+				imputacion.setProyectoId(Long.parseLong(proyectoIdStr));
+			}
 
-	        String fechaRealFinStr = formParams.getFirst("fechaRealFin");
-	        if (fechaRealFinStr != null) {
-	            proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
-	        }
+			String tareaIdStr = formParams.getFirst("tareaId");
+			if (tareaIdStr != null) {
+				imputacion.setTareaId(Long.parseLong(tareaIdStr));
+			}
 
-	        proyectoService.registrar(proyecto);
+			imputacionService.imputar(imputacion);
 
-	        return Response.status(Response.Status.CREATED).build();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-	    }
+			return Response.status(Response.Status.CREATED).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+		}
 	}
 
 }

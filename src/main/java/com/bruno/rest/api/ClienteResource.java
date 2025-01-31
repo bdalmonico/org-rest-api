@@ -16,6 +16,7 @@ import javax.ws.rs.core.Response.Status;
 import com.bruno.org.dao.DataException;
 import com.bruno.org.model.ClienteCriteria;
 import com.bruno.org.model.ClienteDTO;
+import com.bruno.org.model.ProyectoDTO;
 import com.bruno.org.model.Results;
 import com.bruno.org.service.ClienteService;
 import com.bruno.org.service.ServiceException;
@@ -89,6 +90,10 @@ public class ClienteResource {
 	}
 
 	@POST
+	@Operation(summary = "Crea cliente", description = "Crea un cliente", responses = {
+			@ApiResponse(responseCode = "200", description = "cliente encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ClienteDTO.class))),
+			@ApiResponse(responseCode = "404", description = "cliente no encontrado"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
 	public Response create(MultivaluedMap<String, String> formParams) {
 		try {

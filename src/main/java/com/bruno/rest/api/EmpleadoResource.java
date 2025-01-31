@@ -49,27 +49,10 @@ public class EmpleadoResource {
 	@Path("/{id}")
 	@GET
 	@Produces
-	@Operation(summary="Busqueda por id de proyecto",
-	   description="Recupera todos los datos de un proyecto por su id",
-	   responses= {
-			   @ApiResponse(
-					   responseCode="200", 
-					   description="Proyecto encontrado",
-					   content=@Content(
-							   	mediaType=MediaType.APPLICATION_JSON,
-							   	schema=@Schema(implementation=EmpleadoDTO.class)
-							   )
-					   ),
-			   @ApiResponse(
-					   responseCode="404",
-					   description="Libro no encontrado"
-					   ),
-			   @ApiResponse(
-					   responseCode="400",
-					   description="Error al recuperar los datos"
-					   )
-	   }
-)	
+	@Operation(summary = "Busqueda por id de empleado", description = "Recupera todos los datos de un empleado por su id", responses = {
+			@ApiResponse(responseCode = "200", description = "empleado encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = EmpleadoDTO.class))),
+			@ApiResponse(responseCode = "404", description = "Empleado no encontrado"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		EmpleadoDTO p = null;
 		try {
@@ -88,20 +71,16 @@ public class EmpleadoResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(
-			@QueryParam("nombre") String nombre,
-			@QueryParam("apellido") String apellido,
-			@QueryParam("email") String email,
-			@QueryParam("fechaEstimadaInicio") String fechaAlta2,
+	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("apellido") String apellido,
+			@QueryParam("email") String email, @QueryParam("fechaEstimadaInicio") String fechaAlta2,
 			@QueryParam("rolId") Integer rolId) {
 		try {
-//			// Criteria... 
 			EmpleadoCriteria criteria = new EmpleadoCriteria();
 			criteria.setNombre(nombre);
 			criteria.setEmail(email);
 			criteria.setApellido(apellido);
 			criteria.setRolId(rolId);
-			
+
 			Date fechaAlta = null;
 			if (fechaAlta2 != null) {
 				// Converter a String para Date
@@ -118,58 +97,6 @@ public class EmpleadoResource {
 			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
 		}
 
-	}
-	
-	@POST
-	@Consumes("application/x-www-form-urlencoded")
-	public Response create(MultivaluedMap<String, String> formParams) {
-	    try {
-	        ProyectoDTO proyecto = new ProyectoDTO();
-	        proyecto.setNombre(formParams.getFirst("nombre"));
-	        proyecto.setDescripcion(formParams.getFirst("descripcion"));
-	        
-	        String estadoIdStr = formParams.getFirst("estadoId");
-	        if (estadoIdStr != null) {
-	            proyecto.setEstadoId(Long.parseLong(estadoIdStr));
-	        }
-
-	        String clienteIdStr = formParams.getFirst("clienteId");
-	        if (clienteIdStr != null) {
-	            proyecto.setClienteId(Long.parseLong(clienteIdStr));
-	        }
-
-	        proyecto.setClienteNombre(formParams.getFirst("clienteNombre"));
-	        proyecto.setImporte(Double.parseDouble(formParams.getFirst("importe")));
-
-	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-	        String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
-	        if (fechaEstimadaInicioStr != null) {
-	            proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
-	        }
-
-	        String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
-	        if (fechaEstimadaFinStr != null) {
-	            proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
-	        }
-
-	        String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
-	        if (fechaRealInicioStr != null) {
-	            proyecto.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
-	        }
-
-	        String fechaRealFinStr = formParams.getFirst("fechaRealFin");
-	        if (fechaRealFinStr != null) {
-	            proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
-	        }
-
-	        empleadoService.registrar(proyecto);
-
-	        return Response.status(Response.Status.CREATED).build();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-	    }
 	}
 
 }

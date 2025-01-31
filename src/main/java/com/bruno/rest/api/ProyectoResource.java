@@ -49,27 +49,10 @@ public class ProyectoResource {
 	@Path("/{id}")
 	@GET
 	@Produces
-	@Operation(summary="Busqueda por id de proyecto",
-	   description="Recupera todos los datos de un proyecto por su id",
-	   responses= {
-			   @ApiResponse(
-					   responseCode="200", 
-					   description="Proyecto encontrado",
-					   content=@Content(
-							   	mediaType=MediaType.APPLICATION_JSON,
-							   	schema=@Schema(implementation=ProyectoDTO.class)
-							   )
-					   ),
-			   @ApiResponse(
-					   responseCode="404",
-					   description="Libro no encontrado"
-					   ),
-			   @ApiResponse(
-					   responseCode="400",
-					   description="Error al recuperar los datos"
-					   )
-	   }
-)	
+	@Operation(summary = "Busqueda por id de proyecto", description = "Recupera todos los datos de un proyecto por su id", responses = {
+			@ApiResponse(responseCode = "200", description = "Proyecto encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProyectoDTO.class))),
+			@ApiResponse(responseCode = "404", description = "Proyecto no encontrado"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		ProyectoDTO p = null;
 		try {
@@ -85,19 +68,7 @@ public class ProyectoResource {
 		}
 
 	}
-	
-	
-	
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response getByCriteria(@BeanParam ProyectoCriteria criteria) {
-		return null;
-		
-	}
-//	
-//	
-//	@POST == @FormParam
+
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
@@ -108,7 +79,6 @@ public class ProyectoResource {
 			@QueryParam("fechaRealInicio") String fechaRealInicio2, @QueryParam("fechaRealFin") String fechaRealfin2,
 			@QueryParam("importe") Double importe) {
 		try {
-//			// Criteria... 
 			ProyectoCriteria criteria = new ProyectoCriteria();
 			criteria.setNombre(nombre);
 			criteria.setDescripcion(descripcion);
@@ -120,7 +90,7 @@ public class ProyectoResource {
 			Date fechaEstimadaInicio = null;
 			if (fechaEstimadaInicio2 != null) {
 				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
 			}
 			criteria.setFechaEstimadaInicio(fechaEstimadaInicio);
@@ -136,15 +106,14 @@ public class ProyectoResource {
 			Date fechaRealInicio = null;
 			if (fechaEstimadaInicio2 != null) {
 				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
 			}
 			criteria.setFechaRealInicio(fechaRealInicio);
 
 			Date fechaRealFin = null;
 			if (fechaEstimadaInicio2 != null) {
-				// Converter a String para Date
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); // Defina o formato desejado
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				fechaEstimadaInicio = sdf.parse(fechaEstimadaInicio2);
 			}
 			criteria.setFechaRealFin(fechaRealFin);
@@ -158,59 +127,62 @@ public class ProyectoResource {
 		}
 
 	}
-	
+
 	@POST
+	@Operation(summary = "Create proyecto", description = "Crea nuevos proyectos", responses = {
+			@ApiResponse(responseCode = "200", description = "Proyecto creados ¡", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProyectoDTO.class))),
+			@ApiResponse(responseCode = "404", description = "Proyecto no creados"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
 	public Response create(MultivaluedMap<String, String> formParams) {
-	    try {
-	        ProyectoDTO proyecto = new ProyectoDTO();
-	        proyecto.setNombre(formParams.getFirst("nombre"));
-	        proyecto.setDescripcion(formParams.getFirst("descripcion"));
-	        
-	        String estadoIdStr = formParams.getFirst("estadoId");
-	        if (estadoIdStr != null) {
-	            proyecto.setEstadoId(Long.parseLong(estadoIdStr));
-	        }
+		try {
+			ProyectoDTO proyecto = new ProyectoDTO();
+			proyecto.setNombre(formParams.getFirst("nombre"));
+			proyecto.setDescripcion(formParams.getFirst("descripcion"));
 
-	        String clienteIdStr = formParams.getFirst("clienteId");
-	        if (clienteIdStr != null) {
-	            proyecto.setClienteId(Long.parseLong(clienteIdStr));
-	        }
+			String estadoIdStr = formParams.getFirst("estadoId");
+			if (estadoIdStr != null) {
+				proyecto.setEstadoId(Long.parseLong(estadoIdStr));
+			}
 
-	        proyecto.setClienteNombre(formParams.getFirst("clienteNombre"));
-	        proyecto.setImporte(Double.parseDouble(formParams.getFirst("importe")));
+			String clienteIdStr = formParams.getFirst("clienteId");
+			if (clienteIdStr != null) {
+				proyecto.setClienteId(Long.parseLong(clienteIdStr));
+			}
 
-	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			proyecto.setClienteNombre(formParams.getFirst("clienteNombre"));
+			proyecto.setImporte(Double.parseDouble(formParams.getFirst("importe")));
 
-	        String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
-	        if (fechaEstimadaInicioStr != null) {
-	            proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
-	        }
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	        String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
-	        if (fechaEstimadaFinStr != null) {
-	            proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
-	        }
+			String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
+			if (fechaEstimadaInicioStr != null) {
+				proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
+			}
 
-	        String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
-	        if (fechaRealInicioStr != null) {
-	            proyecto.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
-	        }
+			String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
+			if (fechaEstimadaFinStr != null) {
+				proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
+			}
 
-	        String fechaRealFinStr = formParams.getFirst("fechaRealFin");
-	        if (fechaRealFinStr != null) {
-	            proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
-	        }
+			String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
+			if (fechaRealInicioStr != null) {
+				proyecto.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
+			}
 
-	        proyectoService.registrar(proyecto);
+			String fechaRealFinStr = formParams.getFirst("fechaRealFin");
+			if (fechaRealFinStr != null) {
+				proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
+			}
 
-	        return Response.status(Response.Status.CREATED).build();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-	    }
+			proyectoService.registrar(proyecto);
+
+			return Response.status(Response.Status.CREATED).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+		}
 	}
-	
 
 	@DELETE
 	@Path("/del/{id}")
@@ -223,16 +195,7 @@ public class ProyectoResource {
 			e.printStackTrace();
 			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Producto " + id + " no encontrado").build();
 		}
-		
+
 	}
 
-	
-	
-
-	
-	
-	
-	
-	
-	
 }

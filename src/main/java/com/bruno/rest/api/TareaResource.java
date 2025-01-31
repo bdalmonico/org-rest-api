@@ -20,9 +20,11 @@ import com.bruno.org.dao.DataException;
 import com.bruno.org.model.ProyectoCriteria;
 import com.bruno.org.model.ProyectoDTO;
 import com.bruno.org.model.Results;
-import com.bruno.org.service.ProyectoService;
+import com.bruno.org.model.TareaCriteria;
+import com.bruno.org.model.TareaDTO;
 import com.bruno.org.service.ServiceException;
-import com.bruno.org.service.impl.ProyectoServiceImpl;
+import com.bruno.org.service.TareaService;
+import com.bruno.org.service.impl.TareaServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,11 +35,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 //Singleton
 public class TareaResource {
 
-	private ProyectoService proyectoService = null;
+	private TareaService tareaService = null;
 
 	public TareaResource() {
 		try {
-			proyectoService = new ProyectoServiceImpl();
+			tareaService = new TareaServiceImpl();
 			System.out.println("Servicio instanciado");
 		} catch (Throwable t) {
 			t.printStackTrace();
@@ -47,31 +49,14 @@ public class TareaResource {
 	@Path("/{id}")
 	@GET
 	@Produces
-	@Operation(summary="Busqueda por id de proyecto",
-	   description="Recupera todos los datos de un proyecto por su id",
-	   responses= {
-			   @ApiResponse(
-					   responseCode="200", 
-					   description="Proyecto encontrado",
-					   content=@Content(
-							   	mediaType=MediaType.APPLICATION_JSON,
-							   	schema=@Schema(implementation=ProyectoDTO.class)
-							   )
-					   ),
-			   @ApiResponse(
-					   responseCode="404",
-					   description="Libro no encontrado"
-					   ),
-			   @ApiResponse(
-					   responseCode="400",
-					   description="Error al recuperar los datos"
-					   )
-	   }
-)	
+	@Operation(summary = "Busqueda por id de tarea", description = "Busca tareas por su id", responses = {
+			@ApiResponse(responseCode = "200", description = "Tarea encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TareaDTO.class))),
+			@ApiResponse(responseCode = "404", description = "Tarea no encontrado"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-		ProyectoDTO p = null;
+		TareaDTO p = null;
 		try {
-			p = proyectoService.findById(id);
+			p = tareaService.findById(id);
 		} catch (Throwable e) {
 
 			e.printStackTrace();
@@ -79,7 +64,7 @@ public class TareaResource {
 		if (p != null) {
 			return Response.ok(p).build();
 		} else {
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Producto " + id + " no encontrado").build();
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Tarea " + id + " no encontrado").build();
 		}
 
 	}
@@ -88,20 +73,20 @@ public class TareaResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
 			@QueryParam("estadoId") Long estadoId, @QueryParam("clienteId") Long clienteId,
-			@QueryParam("clienteNombre") String clienteNombre,
+			@QueryParam("empleadoId") Long empleadoId,
 			@QueryParam("fechaEstimadaInicio") String fechaEstimadaInicio2,
 			@QueryParam("fechaEstimadaFin") String fechaEstimadaFin2,
 			@QueryParam("fechaRealInicio") String fechaRealInicio2, @QueryParam("fechaRealFin") String fechaRealfin2,
-			@QueryParam("importe") Double importe) {
+			@QueryParam("proyectoId") Long proyectoId) {
 		try {
 //			// Criteria... 
-			ProyectoCriteria criteria = new ProyectoCriteria();
+			TareaCriteria criteria = new TareaCriteria();
 			criteria.setNombre(nombre);
 			criteria.setDescripcion(descripcion);
 			criteria.setEstadoId(estadoId);
 			criteria.setClienteId(clienteId);
-			criteria.setClienteNombre(clienteNombre);
-			criteria.setImporte(importe);
+			criteria.setEmpleadoId(empleadoId);
+			criteria.setProyectoId(proyectoId);
 
 			Date fechaEstimadaInicio = null;
 			if (fechaEstimadaInicio2 != null) {
@@ -135,7 +120,7 @@ public class TareaResource {
 			}
 			criteria.setFechaRealFin(fechaRealFin);
 
-			Results<ProyectoDTO> resultados = proyectoService.findByCriteria(criteria, 1, 30);
+			Results<TareaDTO> resultados = tareaService.findByCriteria(criteria, 1, 30);
 
 			return Response.ok(resultados).build();
 		} catch (Exception e) {
@@ -144,57 +129,58 @@ public class TareaResource {
 		}
 
 	}
-	
+
 	@POST
+	@Operation(summary = "Crea una tarea", description = "Crea tareas", responses = {
+			@ApiResponse(responseCode = "200", description = "Tarea creado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TareaDTO.class))),
+			@ApiResponse(responseCode = "404", description = "Tarea no creado"),
+			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
 	public Response create(MultivaluedMap<String, String> formParams) {
-	    try {
-	        ProyectoDTO proyecto = new ProyectoDTO();
-	        proyecto.setNombre(formParams.getFirst("nombre"));
-	        proyecto.setDescripcion(formParams.getFirst("descripcion"));
-	        
-	        String estadoIdStr = formParams.getFirst("estadoId");
-	        if (estadoIdStr != null) {
-	            proyecto.setEstadoId(Long.parseLong(estadoIdStr));
-	        }
+		try {
+			TareaDTO tarea = new TareaDTO();
+			tarea.setNombre(formParams.getFirst("nombre"));
+			tarea.setDescripcion(formParams.getFirst("descripcion"));
 
-	        String clienteIdStr = formParams.getFirst("clienteId");
-	        if (clienteIdStr != null) {
-	            proyecto.setClienteId(Long.parseLong(clienteIdStr));
-	        }
+			String estadoIdStr = formParams.getFirst("estadoId");
+			if (estadoIdStr != null) {
+				tarea.setEstadoId(Long.parseLong(estadoIdStr));
+			}
 
-	        proyecto.setClienteNombre(formParams.getFirst("clienteNombre"));
-	        proyecto.setImporte(Double.parseDouble(formParams.getFirst("importe")));
+			String proyectoIdStr = formParams.getFirst("proyectoId");
+			if (proyectoIdStr != null) {
+				tarea.setProyectoId(Long.parseLong(proyectoIdStr));
+			}
+			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+			String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
+			if (fechaEstimadaInicioStr != null) {
+				tarea.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
+			}
 
-	        String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
-	        if (fechaEstimadaInicioStr != null) {
-	            proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
-	        }
+			String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
+			if (fechaEstimadaFinStr != null) {
+				tarea.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
+			}
 
-	        String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
-	        if (fechaEstimadaFinStr != null) {
-	            proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
-	        }
+			String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
+			if (fechaRealInicioStr != null) {
+				tarea.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
+			}
 
-	        String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
-	        if (fechaRealInicioStr != null) {
-	            proyecto.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
-	        }
+			String fechaRealFinStr = formParams.getFirst("fechaRealFin");
+			if (fechaRealFinStr != null) {
+				tarea.setFechaRealFin(sdf.parse(fechaRealFinStr));
+			}
 
-	        String fechaRealFinStr = formParams.getFirst("fechaRealFin");
-	        if (fechaRealFinStr != null) {
-	            proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
-	        }
+			tareaService.registrar(tarea);
 
-	        proyectoService.registrar(proyecto);
-
-	        return Response.status(Response.Status.CREATED).build();
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-	    }
+			return Response.status(Response.Status.CREATED).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+		}
 	}
 
 }
