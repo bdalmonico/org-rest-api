@@ -3,24 +3,9 @@ package com.bruno.rest.api;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import com.bruno.org.dao.DataException;
 import com.bruno.org.model.EmpleadoCriteria;
 import com.bruno.org.model.EmpleadoDTO;
-import com.bruno.org.model.ProyectoCriteria;
-import com.bruno.org.model.ProyectoDTO;
 import com.bruno.org.model.Results;
 import com.bruno.org.service.EmpleadoService;
 import com.bruno.org.service.ServiceException;
@@ -30,6 +15,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 @Path("/empleado")
 //Singleton

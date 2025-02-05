@@ -1,6 +1,6 @@
 com\bruno\rest\api\ClienteResource.class
-com\bruno\rest\api\EmpleadoTareaResource.class
 com\bruno\rest\api\EmpleadoResource.class
+com\bruno\rest\api\OrgRestApplication.class
 com\bruno\rest\api\ComentarioProyectoResource.class
 com\bruno\rest\api\ComentarioTareaResource.class
 com\bruno\rest\api\EstadoResource.class

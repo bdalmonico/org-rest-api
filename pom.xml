@@ -9,6 +9,11 @@
     <version>1.0-SNAPSHOT</version>
     <name>org-rest-api</name>
 
+    <properties>
+        <jersey.version>3.1.10</jersey.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    
     <build>
         <finalName>org-rest-api</finalName>
         <plugins>
@@ -26,10 +31,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
+	            <configuration>
+    	            <failOnMissingWebXml>false</failOnMissingWebXml>
+            	</configuration>                
             </plugin>
         </plugins>
     </build>
 
+
+
+<!--
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -40,35 +51,45 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>
+    </dependencyManagement> -->
 
     <dependencies>
+    <dependency>
+	    	<groupId>jakarta.ws.rs</groupId>
+    		<artifactId>jakarta.ws.rs-api</artifactId>
+    		<version>3.1.0</version>  <!-- Asegúrate de que sea compatible con tu versión de Jersey -->
+		</dependency>
+		
+		
+		<!-- Jersey (JAX-RS Implementation) -->
+	    <dependency>
+	        <groupId>org.glassfish.jersey.core</groupId>
+    	    <artifactId>jersey-common</artifactId>
+			<version>${jersey.version}</version>
+    	</dependency>
+		
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
+            <!--
             <artifactId>jersey-container-servlet-core</artifactId>
+            -->
             <!-- use the following artifactId if you don't need servlet 2.x compatibility -->
-            <!-- <artifactId>jersey-container-servlet</artifactId> -->
+            <artifactId>jersey-container-servlet</artifactId>
+            <version>${jersey.version}</version> 
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.inject</groupId>
             <artifactId>jersey-hk2</artifactId>
+            <version>${jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-json-binding</artifactId>
+            <version>${jersey.version}</version>
         </dependency>
 
-        <dependency>
-        	<groupId>com.bruno.training.web</groupId>
-        	<artifactId>organizate-middleware</artifactId>
-        	<version>1.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.logging.log4j</groupId>
-        	<artifactId>log4j-core</artifactId>
-        	<version>2.22.1</version>
-        </dependency>
-       
+
+		<!-- Swagger annotations for OpenAPI 3 docmentation -->
         
         <dependency>
 			<groupId>io.swagger.core.v3</groupId>
@@ -85,15 +106,27 @@
 			<artifactId>swagger-ui</artifactId>
 			<version>4.19.1</version>
 		</dependency>
-		
+		<!--
 			<dependency>
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>javax.servlet-api</artifactId>
 		    <version>4.0.1</version>
 		</dependency>
+		-->
+		
+		
+		
+        <dependency>
+        	<groupId>com.bruno.training.web</groupId>
+        	<artifactId>organizate-middleware</artifactId>
+        	<version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.logging.log4j</groupId>
+        	<artifactId>log4j-core</artifactId>
+        	<version>2.22.1</version>
+        </dependency>
+       
     </dependencies>
-    <properties>
-        <jersey.version>2.46</jersey.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+
 </project>
