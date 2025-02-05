@@ -51,7 +51,7 @@ public class ImputacionResource {
 			@ApiResponse(responseCode = "200", description = "Imputacion encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ImputacionDTO.class))),
 			@ApiResponse(responseCode = "404", description = "Imputacion no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findHorasImputadasById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		ImputacionDTO p = null;
 		try {
 			p = imputacionService.findById(id);
@@ -70,7 +70,20 @@ public class ImputacionResource {
 	@Path("/search/criteria")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getByCriteria(@QueryParam("comentario") String comentario,
+	@Operation(
+	    summary = "Buscar horas imputadas por critérios",
+	    description = "Permite buscar horas imputadas aplicando múltiplos critérios como nombre, estado, fechas, entre outros.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Lista de hroas imputadas encontradas",
+	            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Results.class))
+	        ),
+	        @ApiResponse(responseCode = "400", description = "Erro ao recuperar os dados"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	public Response getHorasImputadasByCriteria(@QueryParam("comentario") String comentario,
 			@QueryParam("empleadoId") Long empleadoId, @QueryParam("fechaHora2") String fechaHora2,
 			@QueryParam("horasImputadas") Double horasImputadas, @QueryParam("id") Long id,
 			@QueryParam("proyectoId") Long proyectoId, @QueryParam("tareaId") Long tareaId) {
@@ -104,7 +117,7 @@ public class ImputacionResource {
 	@Path("/search/total")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getTotalByCriteria(@QueryParam("comentario") String comentario,
+	public Response getTotalHorasImputadasByCriteria(@QueryParam("comentario") String comentario,
 			@QueryParam("empleadoId") Long empleadoId, @QueryParam("fechaHora2") String fechaHora2,
 			@QueryParam("horasImputadas") Double horasImputadas, @QueryParam("id") Long id,
 			@QueryParam("proyectoId") Long proyectoId, @QueryParam("tareaId") Long tareaId) {
@@ -141,7 +154,7 @@ public class ImputacionResource {
 			@ApiResponse(responseCode = "404", description = "Imputacion no creado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
-	public Response create(MultivaluedMap<String, String> formParams) {
+	public Response crearImputacionDeHoras(MultivaluedMap<String, String> formParams) {
 		try {
 			ImputacionDTO imputacion = new ImputacionDTO();
 

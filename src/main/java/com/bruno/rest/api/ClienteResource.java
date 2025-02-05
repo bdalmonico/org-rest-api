@@ -49,7 +49,7 @@ public class ClienteResource {
 			@ApiResponse(responseCode = "200", description = "cliente encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ClienteDTO.class))),
 			@ApiResponse(responseCode = "404", description = "no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findClienteById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		ClienteDTO p = null;
 		try {
 			p = clienteService.findById(id);
@@ -67,7 +67,20 @@ public class ClienteResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("email") String email,
+	@Operation(
+	    summary = "Buscar cliente por critérios",
+	    description = "Permite buscar cliente aplicando múltiplos critérios como nombre, estado, fechas, entre outros.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Lista de cliente encontradas",
+	            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Results.class))
+	        ),
+	        @ApiResponse(responseCode = "400", description = "Erro ao recuperar os dados"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	public Response getClienteByCriteira(@QueryParam("nombre") String nombre, @QueryParam("email") String email,
 			@QueryParam("estadoId") Long estadoId, @QueryParam("nifcif") String nifCif,
 			@QueryParam("clienteNombre") String clienteNombre, @QueryParam("telefone") String telefone) {
 		try {
@@ -95,7 +108,7 @@ public class ClienteResource {
 			@ApiResponse(responseCode = "404", description = "cliente no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
-	public Response create(MultivaluedMap<String, String> formParams) {
+	public Response crearCliente(MultivaluedMap<String, String> formParams) {
 		try {
 			ClienteDTO cliente = new ClienteDTO();
 			cliente.setNombre(formParams.getFirst("nombre"));

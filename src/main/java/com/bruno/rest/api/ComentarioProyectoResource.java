@@ -48,7 +48,7 @@ public class ComentarioProyectoResource {
 			@ApiResponse(responseCode = "200", description = "ComentarioProyecto encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ComentarioProyectoDTO.class))),
 			@ApiResponse(responseCode = "404", description = "ComentarioProyecto no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findComentarioProyectoById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		ComentarioProyectoDTO p = null;
 		try {
 			p = comentarioProyectoService.findById(id);
@@ -76,7 +76,7 @@ public class ComentarioProyectoResource {
 			@ApiResponse(responseCode = "404", description = "comentario proyecto no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Produces
-	public Response findByProyecto(@PathParam("proyectoId") Long proyectoId)
+	public Response findComentarioByProyecto(@PathParam("proyectoId") Long proyectoId)
 			throws NumberFormatException, DataException, ServiceException {
 
 		Results<ComentarioProyectoDTO> p = null;
@@ -101,7 +101,7 @@ public class ComentarioProyectoResource {
 			@ApiResponse(responseCode = "404", description = "ComentarioProyecto no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
-	public Response create(MultivaluedMap<String, String> formParams) {
+	public Response crearComentarioProyecto(MultivaluedMap<String, String> formParams) {
 		try {
 			ComentarioProyectoDTO comentarioProyecto = new ComentarioProyectoDTO();
 

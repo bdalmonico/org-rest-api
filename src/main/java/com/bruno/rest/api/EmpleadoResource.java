@@ -53,7 +53,7 @@ public class EmpleadoResource {
 			@ApiResponse(responseCode = "200", description = "empleado encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = EmpleadoDTO.class))),
 			@ApiResponse(responseCode = "404", description = "Empleado no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findEmpleadoById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		EmpleadoDTO p = null;
 		try {
 			p = empleadoService.findById(id);
@@ -69,9 +69,23 @@ public class EmpleadoResource {
 
 	}
 
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("apellido") String apellido,
+	@Operation(
+	    summary = "Buscar empleado por critérios",
+	    description = "Permite buscar empleado aplicando múltiplos critérios como nombre, estado, fechas, entre outros.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Lista de empleados encontradas",
+	            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Results.class))
+	        ),
+	        @ApiResponse(responseCode = "400", description = "Erro ao recuperar os dados"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	public Response getEmpleadoByCriteria(@QueryParam("nombre") String nombre, @QueryParam("apellido") String apellido,
 			@QueryParam("email") String email, @QueryParam("fechaEstimadaInicio") String fechaAlta2,
 			@QueryParam("rolId") Integer rolId) {
 		try {

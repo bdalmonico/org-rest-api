@@ -52,7 +52,7 @@ public class ComentarioTareaResource {
 					schema = @Schema(implementation = ComentarioTareaDTO.class))),
 			@ApiResponse(responseCode = "404", description = "Comentario Tarea no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findComentarioTareaById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		ComentarioTareaDTO p = null;
 		try {
 			p = comentarioTareaService.findById(id);
@@ -80,7 +80,7 @@ public class ComentarioTareaResource {
 			@ApiResponse(responseCode = "404", description = "Comentario tarea no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Produces
-	public Response findByTarea(@PathParam("tareaId") Long tareaId)
+	public Response findComentarioByTarea(@PathParam("tareaId") Long tareaId)
 			throws NumberFormatException, DataException, ServiceException {
 
 		Results<ComentarioTareaDTO> p = null;
@@ -111,7 +111,7 @@ public class ComentarioTareaResource {
 			@ApiResponse(responseCode = "404", description = "Comentario tarea no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
-	public Response create(MultivaluedMap<String, String> formParams) {
+	public Response crearComentarioTarea(MultivaluedMap<String, String> formParams) {
 		try {
 			ComentarioTareaDTO comentarioTarea = new ComentarioTareaDTO();
 

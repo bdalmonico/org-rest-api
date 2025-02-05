@@ -17,8 +17,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.bruno.org.dao.DataException;
-import com.bruno.org.model.ProyectoCriteria;
-import com.bruno.org.model.ProyectoDTO;
 import com.bruno.org.model.Results;
 import com.bruno.org.model.TareaCriteria;
 import com.bruno.org.model.TareaDTO;
@@ -27,10 +25,12 @@ import com.bruno.org.service.TareaService;
 import com.bruno.org.service.impl.TareaServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
+//http://localhost:8080/org-rest-api/v1/openapi.json
 @Path("/tarea")
 //Singleton
 public class TareaResource {
@@ -53,7 +53,7 @@ public class TareaResource {
 			@ApiResponse(responseCode = "200", description = "Tarea encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TareaDTO.class))),
 			@ApiResponse(responseCode = "404", description = "Tarea no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findByTareaId(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		TareaDTO p = null;
 		try {
 			p = tareaService.findById(id);
@@ -71,12 +71,29 @@ public class TareaResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
-			@QueryParam("estadoId") Long estadoId, @QueryParam("clienteId") Long clienteId,
+	@Operation(
+	    summary = "Buscar tareas por critérios",
+	    description = "Permite buscar tareas aplicando múltiplos critérios como nombre, estado, fechas, entre outros.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Lista de tareas encontradas",
+	            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Results.class))
+	        ),
+	        @ApiResponse(responseCode = "400", description = "Erro ao recuperar os dados"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	public Response getTareaByCriteria(
+			@Parameter(description = "Nome da tarea") @QueryParam("nombre") String nombre,
+			@QueryParam("descripcion") String descripcion,
+			@QueryParam("estadoId") Long estadoId, 
+			@QueryParam("clienteId") Long clienteId,
 			@QueryParam("empleadoId") Long empleadoId,
 			@QueryParam("fechaEstimadaInicio") String fechaEstimadaInicio2,
 			@QueryParam("fechaEstimadaFin") String fechaEstimadaFin2,
-			@QueryParam("fechaRealInicio") String fechaRealInicio2, @QueryParam("fechaRealFin") String fechaRealfin2,
+			@QueryParam("fechaRealInicio") String fechaRealInicio2, 
+			@QueryParam("fechaRealFin") String fechaRealfin2,
 			@QueryParam("proyectoId") Long proyectoId) {
 		try {
 //			// Criteria... 
@@ -136,7 +153,7 @@ public class TareaResource {
 			@ApiResponse(responseCode = "404", description = "Tarea no creado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
-	public Response create(MultivaluedMap<String, String> formParams) {
+	public Response crearTarea(MultivaluedMap<String, String> formParams) {
 		try {
 			TareaDTO tarea = new TareaDTO();
 			tarea.setNombre(formParams.getFirst("nombre"));

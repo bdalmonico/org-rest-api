@@ -53,7 +53,7 @@ public class ProyectoResource {
 			@ApiResponse(responseCode = "200", description = "Proyecto encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProyectoDTO.class))),
 			@ApiResponse(responseCode = "404", description = "Proyecto no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findProyectoById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		ProyectoDTO p = null;
 		try {
 			p = proyectoService.findById(id);
@@ -71,7 +71,20 @@ public class ProyectoResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getBy(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
+	@Operation(
+	    summary = "Buscar proyectos por critérios",
+	    description = "Permite buscar proyectos aplicando múltiplos critérios como nombre, estado, fechas, entre outros.",
+	    responses = {
+	        @ApiResponse(
+	            responseCode = "200",
+	            description = "Lista de proyectos encontrados",
+	            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Results.class))
+	        ),
+	        @ApiResponse(responseCode = "400", description = "Erro ao recuperar os dados"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	public Response getProyectoByCriteria(@QueryParam("nombre") String nombre, @QueryParam("descripcion") String descripcion,
 			@QueryParam("estadoId") Long estadoId, @QueryParam("clienteId") Long clienteId,
 			@QueryParam("clienteNombre") String clienteNombre,
 			@QueryParam("fechaEstimadaInicio") String fechaEstimadaInicio2,
@@ -134,7 +147,7 @@ public class ProyectoResource {
 			@ApiResponse(responseCode = "404", description = "Proyecto no creados"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
 	@Consumes("application/x-www-form-urlencoded")
-	public Response create(MultivaluedMap<String, String> formParams) {
+	public Response crearProyecto(MultivaluedMap<String, String> formParams) {
 		try {
 			ProyectoDTO proyecto = new ProyectoDTO();
 			proyecto.setNombre(formParams.getFirst("nombre"));

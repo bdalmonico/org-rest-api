@@ -41,7 +41,7 @@ public class EstadoResource {
 			@ApiResponse(responseCode = "200", description = "Estado encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = EstadoDTO.class))),
 			@ApiResponse(responseCode = "404", description = "Estado no encontrado"),
 			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+	public Response findEstadoById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
 		EstadoDTO p = null;
 		try {
 			p = estadoService.findById(id);
