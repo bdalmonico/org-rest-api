@@ -3,12 +3,10 @@ package com.bruno.rest.api;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.bruno.org.dao.DataException;
 import com.bruno.org.model.ImputacionCriteria;
 import com.bruno.org.model.ImputacionDTO;
 import com.bruno.org.model.Results;
 import com.bruno.org.service.ImputacionService;
-import com.bruno.org.service.ServiceException;
 import com.bruno.org.service.impl.ImputacionServiceImpl;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,10 +14,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
@@ -43,28 +41,28 @@ public class ImputacionResource {
 		}
 	}
 
-	@Path("/{id}")
-	@GET
-	@Produces
-	@Operation(summary = "Busca imputacion por su id", description = "Recupera imputacion por su id", responses = {
-			@ApiResponse(responseCode = "200", description = "Imputacion encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ImputacionDTO.class))),
-			@ApiResponse(responseCode = "404", description = "Imputacion no encontrado"),
-			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findHorasImputadasById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-		ImputacionDTO p = null;
-		try {
-			p = imputacionService.findById(id);
-		} catch (Throwable e) {
-
-			e.printStackTrace();
-		}
-		if (p != null) {
-			return Response.ok(p).build();
-		} else {
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Imputacion " + id + " no encontrado").build();
-		}
-
-	}
+//	@Path("/{id}")
+//	@GET
+//	@Produces
+//	@Operation(summary = "Busca imputacion por su id", description = "Recupera imputacion por su id", responses = {
+//			@ApiResponse(responseCode = "200", description = "Imputacion encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ImputacionDTO.class))),
+//			@ApiResponse(responseCode = "404", description = "Imputacion no encontrado"),
+//			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
+//	public Response findHorasImputadasById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+//		ImputacionDTO p = null;
+//		try {
+//			p = imputacionService.findById(id);
+//		} catch (Throwable e) {
+//
+//			e.printStackTrace();
+//		}
+//		if (p != null) {
+//			return Response.ok(p).build();
+//		} else {
+//			return Response.status(Status.BAD_REQUEST.getStatusCode(), "Imputacion " + id + " no encontrado").build();
+//		}
+//
+//	}
 
 	@Path("/search/criteria")
 	@GET
@@ -193,6 +191,42 @@ public class ImputacionResource {
 			e.printStackTrace();
 			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
 		}
+	}
+	
+	@DELETE
+	@Operation(
+	        summary = "Eliminar una imputación",
+	        description = "Elimina una imputación a partir de su ID pasado como Query Param.",
+	        responses = {
+	                @ApiResponse(responseCode = "200", description = "Imputación eliminada exitosamente"),
+	                @ApiResponse(responseCode = "404", description = "Imputación no encontrada"),
+	                @ApiResponse(responseCode = "400", description = "Error al eliminar la imputación")
+	        }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteImputacion(@QueryParam("id") Long id) {
+	    try {
+	        if (id == null) {
+	            return Response.status(Status.BAD_REQUEST)
+	                    .entity("Debe proporcionar un ID válido.")
+	                    .build();
+	        }
+
+	        boolean eliminado = imputacionService.delete(id);
+
+	        if (eliminado) {
+	            return Response.ok("Imputación eliminada exitosamente.").build();
+	        } else {
+	            return Response.status(Status.NOT_FOUND)
+	                    .entity("Imputación con ID " + id + " no encontrada.")
+	                    .build();
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.INTERNAL_SERVER_ERROR)
+	                .entity("Error al eliminar la imputación: " + e.getMessage())
+	                .build();
+	    }
 	}
 
 }

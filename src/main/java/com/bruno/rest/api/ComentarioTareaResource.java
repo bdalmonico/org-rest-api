@@ -13,14 +13,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -39,33 +38,33 @@ public class ComentarioTareaResource {
 		}
 	}
 
-	@Path("/{id}")
-	@GET
-	@Produces
-	@Operation(
-			summary = "Busqueda por id de Comentariotarea", 
-			description = "Recupera todos los datos de un Comentario Tarea por su id", 
-			responses = {
-			@ApiResponse(responseCode = "200", description = "Comentario Tarea encontrado", 
-					content = @Content(mediaType = MediaType.APPLICATION_JSON, 
-					schema = @Schema(implementation = ComentarioTareaDTO.class))),
-			@ApiResponse(responseCode = "404", description = "Comentario Tarea no encontrado"),
-			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	public Response findComentarioTareaById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-		ComentarioTareaDTO p = null;
-		try {
-			p = comentarioTareaService.findById(id);
-		} catch (Throwable e) {
-
-			e.printStackTrace();
-		}
-		if (p != null) {
-			return Response.ok(p).build();
-		} else {
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), "tarea " + id + " no encontrado").build();
-		}
-
-	}
+//	@Path("/{id}")
+//	@GET
+//	@Produces
+//	@Operation(
+//			summary = "Busqueda por id de Comentariotarea", 
+//			description = "Recupera todos los datos de un Comentario Tarea por su id", 
+//			responses = {
+//			@ApiResponse(responseCode = "200", description = "Comentario Tarea encontrado", 
+//					content = @Content(mediaType = MediaType.APPLICATION_JSON, 
+//					schema = @Schema(implementation = ComentarioTareaDTO.class))),
+//			@ApiResponse(responseCode = "404", description = "Comentario Tarea no encontrado"),
+//			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
+//	public Response findComentarioTareaById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
+//		ComentarioTareaDTO p = null;
+//		try {
+//			p = comentarioTareaService.findById(id);
+//		} catch (Throwable e) {
+//
+//			e.printStackTrace();
+//		}
+//		if (p != null) {
+//			return Response.ok(p).build();
+//		} else {
+//			return Response.status(Status.BAD_REQUEST.getStatusCode(), "tarea " + id + " no encontrado").build();
+//		}
+//
+//	}
 
 	@Path("/tarea/{tareaId}")
 	@GET
@@ -101,45 +100,39 @@ public class ComentarioTareaResource {
 
 	@POST
 	@Operation(
-			summary = "Crea comentario Tarea", 
-			description = "Crea comentariotarea", 
-			responses = {
-			@ApiResponse(responseCode = "200", description = "Comentario Tarea encontrado", 
-					content = @Content(mediaType = MediaType.APPLICATION_JSON, 
-					schema = @Schema(implementation = ComentarioTareaDTO.class))),
-			@ApiResponse(responseCode = "404", description = "Comentario tarea no encontrado"),
-			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	@Consumes("application/x-www-form-urlencoded")
-	public Response crearComentarioTarea(MultivaluedMap<String, String> formParams) {
-		try {
-			ComentarioTareaDTO comentarioTarea = new ComentarioTareaDTO();
+	        summary = "Crea comentario Tarea",
+	        description = "Crea un comentario en una tarea usando Query Params",
+	        responses = {
+	                @ApiResponse(responseCode = "201", description = "Comentario Tarea creado exitosamente"),
+	                @ApiResponse(responseCode = "400", description = "Error al crear el comentario")
+	        }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response crearComentarioTarea(
+	        @QueryParam("comentario") String comentario,
+	        @QueryParam("empleadoId") Long empleadoId,
+	        @QueryParam("fechaHora") String fechaHoraStr,
+	        @QueryParam("tareaId") Long tareaId) {
+	    try {
+	        ComentarioTareaDTO comentarioTarea = new ComentarioTareaDTO();
+	        comentarioTarea.setComentario(comentario);
+	        comentarioTarea.setEmpleadoId(empleadoId);
+	        comentarioTarea.setTareaId(tareaId);
 
-			comentarioTarea.setComentario(formParams.getFirst("comentario"));
+	        // Convertendo a string da data para um objeto Date
+	        if (fechaHoraStr != null) {
+	            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	            comentarioTarea.setFechaHora(sdf.parse(fechaHoraStr));
+	        }
 
-			String empleadoIdStr = formParams.getFirst("empleadoId");
-			if (empleadoIdStr != null) {
-				comentarioTarea.setEmpleadoId(Long.parseLong(empleadoIdStr));
-			}
+	        comentarioTareaService.comentar(comentarioTarea);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-			String fechaHoraStr = formParams.getFirst("fechaHora");
-			if (fechaHoraStr != null) {
-				comentarioTarea.setFechaHora(sdf.parse(fechaHoraStr));
-			}
-
-			String tareaIdStr = formParams.getFirst("tareaId");
-			if (tareaIdStr != null) {
-				comentarioTarea.setTareaId(Long.parseLong(tareaIdStr));
-			}
-
-			comentarioTareaService.comentar(comentarioTarea);
-
-			return Response.status(Response.Status.CREATED).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-		}
+	        return Response.status(Response.Status.CREATED).build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+	    }
 	}
+
 
 }

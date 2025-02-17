@@ -13,16 +13,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -103,28 +102,70 @@ public class ClienteResource {
 
 	@POST
 	@Operation(summary = "Crea cliente", description = "Crea un cliente", responses = {
-			@ApiResponse(responseCode = "200", description = "cliente encontrado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ClienteDTO.class))),
-			@ApiResponse(responseCode = "404", description = "cliente no encontrado"),
-			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	@Consumes("application/x-www-form-urlencoded")
-	public Response crearCliente(MultivaluedMap<String, String> formParams) {
-		try {
-			ClienteDTO cliente = new ClienteDTO();
-			cliente.setNombre(formParams.getFirst("nombre"));
-			cliente.setEmail(formParams.getFirst("email"));
-			cliente.setNifCif(formParams.getFirst("nifCif"));
-			cliente.setTelefone(formParams.getFirst("telefone"));
+	        @ApiResponse(responseCode = "200", description = "cliente creado exitosamente"),
+	        @ApiResponse(responseCode = "400", description = "Error al crear el cliente")
+	})
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response crearCliente(
+	        @QueryParam("nombre") String nombre,
+	        @QueryParam("email") String email,
+	        @QueryParam("nifCif") String nifCif,
+	        @QueryParam("telefone") String telefone,
+	        @QueryParam("estadoId") Long estadoId) {
+	    try {
+	        ClienteDTO cliente = new ClienteDTO();
+	        cliente.setNombre(nombre);
+	        cliente.setEmail(email);
+	        cliente.setNifCif(nifCif);
+	        cliente.setTelefone(telefone);
+	        cliente.setEstadoId(estadoId);
 
-			String estadoIdStr = formParams.getFirst("estadoId");
-			if (estadoIdStr != null) {
-				cliente.setEstadoId(Long.parseLong(estadoIdStr));
-			}
-			clienteService.registrar(cliente);
-			return Response.status(Response.Status.CREATED).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-		}
+	        clienteService.registrar(cliente);
+
+	        return Response.status(Response.Status.CREATED).entity("Cliente creado con éxito").build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+	    }
+	}
+	
+	@PUT
+	@Path("/{id}")
+	@Operation(summary = "Actualizar cliente", description = "Actualiza los datos de un cliente existente", responses = {
+	        @ApiResponse(responseCode = "200", description = "Cliente actualizado exitosamente"),
+	        @ApiResponse(responseCode = "400", description = "Error al actualizar el cliente"),
+	        @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
+	})
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateCliente(
+	        @PathParam("id") Long id,
+	        @QueryParam("nombre") String nombre,
+	        @QueryParam("email") String email,
+	        @QueryParam("nifCif") String nifCif,
+	        @QueryParam("telefone") String telefone,
+	        @QueryParam("estadoId") Long estadoId) {
+	    try {
+	        // Buscar cliente existente
+	        ClienteDTO cliente = clienteService.findById(id);
+	        if (cliente == null) {
+	            return Response.status(Status.NOT_FOUND.getStatusCode(), "Cliente " + id + " no encontrado").build();
+	        }
+
+	        // Atualizar os campos se forem fornecidos
+	        if (nombre != null) cliente.setNombre(nombre);
+	        if (email != null) cliente.setEmail(email);
+	        if (nifCif != null) cliente.setNifCif(nifCif);
+	        if (telefone != null) cliente.setTelefone(telefone);
+	        if (estadoId != null) cliente.setEstadoId(estadoId);
+
+	        // Salvar as alterações
+	        clienteService.update(cliente);
+
+	        return Response.ok("Cliente actualizado con éxito").build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+	    }
 	}
 
 }

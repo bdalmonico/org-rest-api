@@ -15,7 +15,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -105,6 +107,82 @@ public class EmpleadoResource {
 			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
 		}
 
+	}
+
+	@POST
+	@Operation(
+	        summary = "Crea un nuevo empleado",
+	        description = "Permite crear un empleado enviando datos a través de Query Params.",
+	        responses = {
+	                @ApiResponse(responseCode = "201", description = "Empleado creado exitosamente"),
+	                @ApiResponse(responseCode = "400", description = "Error en la creación del empleado")
+	        }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response crearEmpleado(
+	        @QueryParam("nombre") String nombre,
+	        @QueryParam("apellido") String apellido,
+	        @QueryParam("email") String email,
+	        @QueryParam("fechaAlta") String fechaAltaStr,
+	        @QueryParam("rolId") Integer rolId) {
+	    try {
+	        EmpleadoDTO empleado = new EmpleadoDTO();
+	        empleado.setNombre(nombre);
+	        empleado.setApellido(apellido);
+	        empleado.setEmail(email);
+	        empleado.setRolId(rolId);
+	        
+
+	        // Convertendo a string da data para um objeto Date
+	        if (fechaAltaStr != null) {
+	            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	            Date fechaAlta = sdf.parse(fechaAltaStr);
+	            empleado.setFechaAlta(fechaAlta);
+	        }
+
+	        empleadoService.registrar(empleado);
+
+	        return Response.status(Response.Status.CREATED).build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+	    }
+	}
+
+	@DELETE
+	@Operation(
+	        summary = "Eliminar un empleado",
+	        description = "Elimina un empleado a partir de su ID pasado como Query Param.",
+	        responses = {
+	                @ApiResponse(responseCode = "200", description = "Empleado eliminado exitosamente"),
+	                @ApiResponse(responseCode = "404", description = "Empleado no encontrado"),
+	                @ApiResponse(responseCode = "400", description = "Error al eliminar el empleado")
+	        }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteEmpleado(@QueryParam("id") Long id) {
+	    try {
+	        if (id == null) {
+	            return Response.status(Status.BAD_REQUEST)
+	                    .entity("Debe proporcionar un ID válido.")
+	                    .build();
+	        }
+
+	        boolean eliminado = empleadoService.delete(id);
+
+	        if (eliminado) {
+	            return Response.ok("Empleado eliminado exitosamente.").build();
+	        } else {
+	            return Response.status(Status.NOT_FOUND)
+	                    .entity("Empleado con ID " + id + " no encontrado.")
+	                    .build();
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.INTERNAL_SERVER_ERROR)
+	                .entity("Error al eliminar el empleado: " + e.getMessage())
+	                .build();
+	    }
 	}
 
 }

@@ -140,60 +140,62 @@ public class ProyectoResource {
 	}
 
 	@POST
-	@Operation(summary = "Create proyecto", description = "Crea nuevos proyectos", responses = {
-			@ApiResponse(responseCode = "200", description = "Proyecto creados ¡", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProyectoDTO.class))),
-			@ApiResponse(responseCode = "404", description = "Proyecto no creados"),
-			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	@Consumes("application/x-www-form-urlencoded")
-	public Response crearProyecto(MultivaluedMap<String, String> formParams) {
-		try {
-			ProyectoDTO proyecto = new ProyectoDTO();
-			proyecto.setNombre(formParams.getFirst("nombre"));
-			proyecto.setDescripcion(formParams.getFirst("descripcion"));
+	@Path("/crear")
+	@Operation(
+	    summary = "Create proyecto",
+	    description = "Crea nuevos proyectos",
+	    responses = {
+	        @ApiResponse(responseCode = "201", description = "Proyecto creado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ProyectoDTO.class))),
+	        @ApiResponse(responseCode = "400", description = "Error al recuperar los datos")
+	    }
+	)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response crearProyecto(
+	    @QueryParam("nombre") String nombre,
+	    @QueryParam("descripcion") String descripcion,
+	    @QueryParam("estadoId") Long estadoId,
+	    @QueryParam("clienteId") Long clienteId,
+	    @QueryParam("clienteNombre") String clienteNombre,
+	    @QueryParam("importe") Double importe,
+	    @QueryParam("fechaEstimadaInicio") String fechaEstimadaInicio,
+	    @QueryParam("fechaEstimadaFin") String fechaEstimadaFin,
+	    @QueryParam("fechaRealInicio") String fechaRealInicio,
+	    @QueryParam("fechaRealFin") String fechaRealFin
+	) {
+	    try {
+	        ProyectoDTO proyecto = new ProyectoDTO();
+	        proyecto.setNombre(nombre);
+	        proyecto.setDescripcion(descripcion);
+	        proyecto.setEstadoId(estadoId);
+	        proyecto.setClienteId(clienteId);
+	        proyecto.setClienteNombre(clienteNombre);
+	        proyecto.setImporte(importe);
 
-			String estadoIdStr = formParams.getFirst("estadoId");
-			if (estadoIdStr != null) {
-				proyecto.setEstadoId(Long.parseLong(estadoIdStr));
-			}
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-			String clienteIdStr = formParams.getFirst("clienteId");
-			if (clienteIdStr != null) {
-				proyecto.setClienteId(Long.parseLong(clienteIdStr));
-			}
+	        if (fechaEstimadaInicio != null) {
+	            proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicio));
+	        }
+	        if (fechaEstimadaFin != null) {
+	            proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFin));
+	        }
+	        if (fechaRealInicio != null) {
+	            proyecto.setFechaRealInicio(sdf.parse(fechaRealInicio));
+	        }
+	        if (fechaRealFin != null) {
+	            proyecto.setFechaRealFin(sdf.parse(fechaRealFin));
+	        }
 
-			proyecto.setClienteNombre(formParams.getFirst("clienteNombre"));
-			proyecto.setImporte(Double.parseDouble(formParams.getFirst("importe")));
+	        proyectoService.registrar(proyecto);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-			String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
-			if (fechaEstimadaInicioStr != null) {
-				proyecto.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
-			}
-
-			String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
-			if (fechaEstimadaFinStr != null) {
-				proyecto.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
-			}
-
-			String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
-			if (fechaRealInicioStr != null) {
-				proyecto.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
-			}
-
-			String fechaRealFinStr = formParams.getFirst("fechaRealFin");
-			if (fechaRealFinStr != null) {
-				proyecto.setFechaRealFin(sdf.parse(fechaRealFinStr));
-			}
-
-			proyectoService.registrar(proyecto);
-
-			return Response.status(Response.Status.CREATED).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-		}
+	        return Response.status(Response.Status.CREATED).entity(proyecto).build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.BAD_REQUEST).entity("Error al crear el proyecto: " + e.getMessage()).build();
+	    }
 	}
+
 
 	@DELETE
 	@Path("/del/{id}")

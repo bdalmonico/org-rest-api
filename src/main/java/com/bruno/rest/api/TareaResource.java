@@ -147,58 +147,59 @@ public class TareaResource {
 	}
 
 	@POST
-	@Operation(summary = "Crea una tarea", description = "Crea tareas", responses = {
-			@ApiResponse(responseCode = "200", description = "Tarea creado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TareaDTO.class))),
-			@ApiResponse(responseCode = "404", description = "Tarea no creado"),
-			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	//cambiar para queryparam
-	//passar os parametros documentados
-	@Consumes("application/x-www-form-urlencoded")
-	public Response crearTarea(MultivaluedMap<String, String> formParams) {
-		try {
-			TareaDTO tarea = new TareaDTO();
-			tarea.setNombre(formParams.getFirst("nombre"));
-			tarea.setDescripcion(formParams.getFirst("descripcion"));
+	@Path("/crear")
+	@Operation(
+	    summary = "Crea una tarea",
+	    description = "Crea tareas con los datos proporcionados como parámetros de consulta.",
+	    responses = {
+	        @ApiResponse(responseCode = "201", description = "Tarea creada exitosamente", 
+	            content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TareaDTO.class))),
+	        @ApiResponse(responseCode = "400", description = "Error al recuperar los datos")
+	    }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response crearTarea(
+	    @QueryParam("nombre") @Parameter(description = "Nombre de la tarea", required = true) String nombre,
+	    @QueryParam("descripcion") @Parameter(description = "Descripción de la tarea") String descripcion,
+	    @QueryParam("estadoId") @Parameter(description = "ID del estado de la tarea") Long estadoId,
+	    @QueryParam("proyectoId") @Parameter(description = "ID del proyecto asociado") Long proyectoId,
+	    @QueryParam("fechaEstimadaInicio") @Parameter(description = "Fecha estimada de inicio (Formato: yyyy-MM-dd)") String fechaEstimadaInicio,
+	    @QueryParam("fechaEstimadaFin") @Parameter(description = "Fecha estimada de finalización (Formato: yyyy-MM-dd)") String fechaEstimadaFin,
+	    @QueryParam("fechaRealInicio") @Parameter(description = "Fecha real de inicio (Formato: yyyy-MM-dd)") String fechaRealInicio,
+	    @QueryParam("fechaRealFin") @Parameter(description = "Fecha real de finalización (Formato: yyyy-MM-dd)") String fechaRealFin
+	) {
+	    try {
+	        TareaDTO tarea = new TareaDTO();
+	        tarea.setNombre(nombre);
+	        tarea.setDescripcion(descripcion);
+	        tarea.setEstadoId(estadoId);
+	        tarea.setProyectoId(proyectoId);
 
-			String estadoIdStr = formParams.getFirst("estadoId");
-			if (estadoIdStr != null) {
-				tarea.setEstadoId(Long.parseLong(estadoIdStr));
-			}
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-			String proyectoIdStr = formParams.getFirst("proyectoId");
-			if (proyectoIdStr != null) {
-				tarea.setProyectoId(Long.parseLong(proyectoIdStr));
-			}
-			
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	        if (fechaEstimadaInicio != null && !fechaEstimadaInicio.isEmpty()) {
+	            tarea.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicio));
+	        }
+	        if (fechaEstimadaFin != null && !fechaEstimadaFin.isEmpty()) {
+	            tarea.setFechaEstimadaFin(sdf.parse(fechaEstimadaFin));
+	        }
+	        if (fechaRealInicio != null && !fechaRealInicio.isEmpty()) {
+	            tarea.setFechaRealInicio(sdf.parse(fechaRealInicio));
+	        }
+	        if (fechaRealFin != null && !fechaRealFin.isEmpty()) {
+	            tarea.setFechaRealFin(sdf.parse(fechaRealFin));
+	        }
 
-			String fechaEstimadaInicioStr = formParams.getFirst("fechaEstimadaInicio");
-			if (fechaEstimadaInicioStr != null) {
-				tarea.setFechaEstimadaInicio(sdf.parse(fechaEstimadaInicioStr));
-			}
+	        tareaService.registrar(tarea);
 
-			String fechaEstimadaFinStr = formParams.getFirst("fechaEstimadaFin");
-			if (fechaEstimadaFinStr != null) {
-				tarea.setFechaEstimadaFin(sdf.parse(fechaEstimadaFinStr));
-			}
-
-			String fechaRealInicioStr = formParams.getFirst("fechaRealInicio");
-			if (fechaRealInicioStr != null) {
-				tarea.setFechaRealInicio(sdf.parse(fechaRealInicioStr));
-			}
-
-			String fechaRealFinStr = formParams.getFirst("fechaRealFin");
-			if (fechaRealFinStr != null) {
-				tarea.setFechaRealFin(sdf.parse(fechaRealFinStr));
-			}
-
-			tareaService.registrar(tarea);
-
-			return Response.status(Response.Status.CREATED).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-		}
+	        return Response.status(Response.Status.CREATED).entity(tarea).build();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.BAD_REQUEST)
+	                .entity("Error al crear la tarea: " + e.getMessage())
+	                .build();
+	    }
 	}
+
 
 }
