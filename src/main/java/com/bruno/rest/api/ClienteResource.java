@@ -101,7 +101,8 @@ public class ClienteResource {
 	}
 
 	@POST
-	@Operation(summary = "Crea cliente", description = "Crea un cliente", responses = {
+	@Operation(summary = "Crea cliente",
+			description = "Crea un cliente", responses = {
 	        @ApiResponse(responseCode = "200", description = "cliente creado exitosamente"),
 	        @ApiResponse(responseCode = "400", description = "Error al crear el cliente")
 	})
