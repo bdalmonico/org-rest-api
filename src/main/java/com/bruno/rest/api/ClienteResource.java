@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
@@ -130,43 +131,120 @@ public class ClienteResource {
 	    }
 	}
 	
+//	@PUT
+//	@Path("/update/")
+//	@Operation(summary = "Actualizar cliente", description = "Actualiza los datos de un cliente existente", responses = {
+//	        @ApiResponse(responseCode = "200", description = "Cliente actualizado exitosamente"),
+//	        @ApiResponse(responseCode = "400", description = "Error al actualizar el cliente"),
+//	        @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
+//	})
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response updateCliente(
+//	        @PathParam("id") Long id,
+//	        @QueryParam("nombre") String nombre,
+//	        @QueryParam("email") String email,
+//	        @QueryParam("nifCif") String nifCif,
+//	        @QueryParam("telefone") String telefone,
+//	        @QueryParam("estadoId") Long estadoId) {
+//	    try {
+//	        // Buscar cliente existente
+//	        ClienteDTO cliente = clienteService.findById(id);
+//	        if (cliente == null) {
+//	            return Response.status(Status.NOT_FOUND.getStatusCode(), "Cliente " + id + " no encontrado").build();
+//	        }
+//
+//	        // Atualizar os campos se forem fornecidos
+//	        if (nombre != null) cliente.setNombre(nombre);
+//	        if (email != null) cliente.setEmail(email);
+//	        if (nifCif != null) cliente.setNifCif(nifCif);
+//	        if (telefone != null) cliente.setTelefone(telefone);
+//	        if (estadoId != null) cliente.setEstadoId(estadoId);
+//
+//	        // Salvar as alterações
+//	        clienteService.update(cliente);
+//
+//	        return Response.ok("Cliente actualizado con éxito").build();
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+//	    }
+//	}
+	
 	@PUT
-	@Path("/{id}")
-	@Operation(summary = "Actualizar cliente", description = "Actualiza los datos de un cliente existente", responses = {
-	        @ApiResponse(responseCode = "200", description = "Cliente actualizado exitosamente"),
-	        @ApiResponse(responseCode = "400", description = "Error al actualizar el cliente"),
-	        @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
-	})
+	@Operation(
+	    summary = "Atualizar cliente",
+	    description = "Atualiza os dados de um cliente com base no ID fornecido nos query params.",
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Cliente atualizado com sucesso"),
+	        @ApiResponse(responseCode = "400", description = "Erro ao atualizar o cliente"),
+	        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response updateCliente(
-	        @PathParam("id") Long id,
+	        @QueryParam("id") Long id,
 	        @QueryParam("nombre") String nombre,
 	        @QueryParam("email") String email,
 	        @QueryParam("nifCif") String nifCif,
 	        @QueryParam("telefone") String telefone,
 	        @QueryParam("estadoId") Long estadoId) {
+	    
 	    try {
-	        // Buscar cliente existente
-	        ClienteDTO cliente = clienteService.findById(id);
-	        if (cliente == null) {
-	            return Response.status(Status.NOT_FOUND.getStatusCode(), "Cliente " + id + " no encontrado").build();
+	        if (id == null) {
+	            return Response.status(Status.BAD_REQUEST).entity("ID do cliente é obrigatório").build();
 	        }
 
-	        // Atualizar os campos se forem fornecidos
-	        if (nombre != null) cliente.setNombre(nombre);
-	        if (email != null) cliente.setEmail(email);
-	        if (nifCif != null) cliente.setNifCif(nifCif);
-	        if (telefone != null) cliente.setTelefone(telefone);
-	        if (estadoId != null) cliente.setEstadoId(estadoId);
+	        ClienteDTO cliente = new ClienteDTO();
+	        cliente.setId(id);
+	        cliente.setNombre(nombre);
+	        cliente.setEmail(email);
+	        cliente.setNifCif(nifCif);
+	        cliente.setTelefone(telefone);
+	        cliente.setEstadoId(estadoId);
 
-	        // Salvar as alterações
-	        clienteService.update(cliente);
+	        boolean atualizado = clienteService.update(cliente);
 
-	        return Response.ok("Cliente actualizado con éxito").build();
+	        if (atualizado) {
+	            return Response.ok().entity("Cliente atualizado com sucesso").build();
+	        } else {
+	            return Response.status(Status.NOT_FOUND).entity("Cliente não encontrado").build();
+	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+	        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar o cliente").build();
 	    }
 	}
+
+
+
+	@DELETE
+	@Path("/{id}")
+	@Operation(
+	    summary = "Deletar cliente",
+	    description = "Remove um cliente do sistema com base no ID fornecido.",
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Cliente deletado com sucesso"),
+	        @ApiResponse(responseCode = "400", description = "Erro ao deletar o cliente"),
+	        @ApiResponse(responseCode = "404", description = "Cliente não encontrado"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteCliente(@PathParam("id") Long id) {
+	    try {
+	        boolean deletado = clienteService.delete(id);
+
+	        if (deletado) {
+	            return Response.ok().entity("Cliente deletado com sucesso").build();
+	        } else {
+	            return Response.status(Status.NOT_FOUND).entity("Cliente não encontrado").build();
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao deletar o cliente").build();
+	    }
+	}
+
 
 }

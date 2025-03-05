@@ -145,53 +145,39 @@ public class ImputacionResource {
 
 	}
 
-	@POST
-	@Operation(summary = "Crea una imputacion", description = "Crea una imputacion", responses = {
-			@ApiResponse(responseCode = "200", description = "Imputacion creado", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ImputacionDTO.class))),
-			@ApiResponse(responseCode = "404", description = "Imputacion no creado"),
-			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-	@Consumes("application/x-www-form-urlencoded")
-	public Response crearImputacionDeHoras(MultivaluedMap<String, String> formParams) {
-		try {
-			ImputacionDTO imputacion = new ImputacionDTO();
+	 @POST
+	    @Operation(summary = "Crea una imputacion", description = "Crea una imputacion", responses = {
+	        @ApiResponse(responseCode = "200", description = "Imputacion creada", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ImputacionDTO.class))),
+	        @ApiResponse(responseCode = "404", description = "Imputacion no creada"),
+	        @ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
+	    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	    public Response crearImputacionDeHoras(@QueryParam("comentario") String comentario,
+	        @QueryParam("empleadoId") Long empleadoId, @QueryParam("fechaHora") String fechaHoraStr,
+	        @QueryParam("horasImputadas") Double horasImputadas, @QueryParam("proyectoId") Long proyectoId,
+	        @QueryParam("tareaId") Long tareaId) {
+	        try {
+	            ImputacionDTO imputacion = new ImputacionDTO();
 
-			imputacion.setComentario(formParams.getFirst("comentario"));
+	            imputacion.setComentario(comentario);
+	            imputacion.setEmpleadoId(empleadoId);
 
-			String empleadoIdStr = formParams.getFirst("empleadoId");
-			if (empleadoIdStr != null) {
-				imputacion.setEmpleadoId(Long.parseLong(empleadoIdStr));
-			}
+	            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	            if (fechaHoraStr != null) {
+	                imputacion.setFechaHora(sdf.parse(fechaHoraStr));
+	            }
 
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	            imputacion.setHorasImputadas(horasImputadas);
+	            imputacion.setProyectoId(proyectoId);
+	            imputacion.setTareaId(tareaId);
 
-			String fechaHoraStr = formParams.getFirst("fechaHora");
-			if (fechaHoraStr != null) {
-				imputacion.setFechaHora(sdf.parse(fechaHoraStr));
-			}
+	            imputacionService.imputar(imputacion);
 
-			String horasImputadasStr = formParams.getFirst("horasImputadas");
-			if (horasImputadasStr != null) {
-				imputacion.setHorasImputadas(Double.parseDouble(horasImputadasStr));
-			}
-
-			String proyectoIdStr = formParams.getFirst("proyectoId");
-			if (proyectoIdStr != null) {
-				imputacion.setProyectoId(Long.parseLong(proyectoIdStr));
-			}
-
-			String tareaIdStr = formParams.getFirst("tareaId");
-			if (tareaIdStr != null) {
-				imputacion.setTareaId(Long.parseLong(tareaIdStr));
-			}
-
-			imputacionService.imputar(imputacion);
-
-			return Response.status(Response.Status.CREATED).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
-		}
-	}
+	            return Response.status(Response.Status.CREATED).build();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
+	        }
+	    }
 	
 	@DELETE
 	@Operation(

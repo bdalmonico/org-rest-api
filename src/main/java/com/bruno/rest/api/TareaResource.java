@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -25,7 +25,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -201,5 +200,37 @@ public class TareaResource {
 	    }
 	}
 
+	@DELETE
+	@Path("/{id}")
+	@Operation(
+	    summary = "Eliminar tarea",
+	    description = "Elimina una tarea por su ID.",
+	    responses = {
+	        @ApiResponse(responseCode = "204", description = "Tarea eliminada exitosamente"),
+	        @ApiResponse(responseCode = "404", description = "Tarea no encontrada"),
+	        @ApiResponse(responseCode = "400", description = "Error al eliminar la tarea")
+	    }
+	)
+	public Response deleteTarea(@PathParam("id") Long id) {
+	    try {
+	        // Verifica se a tarea existe
+	        TareaDTO tarea = tareaService.findById(id);
+	        if (tarea == null) {
+	            return Response.status(Status.NOT_FOUND)
+	                .entity("Tarea con ID " + id + " no encontrada")
+	                .build();
+	        }
+	        
+	        // Elimina a tarea
+	        tareaService.delete(id);
+
+	        return Response.status(Status.NO_CONTENT).build(); // Status 204: No Content
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.BAD_REQUEST)
+	            .entity("Error al eliminar la tarea: " + e.getMessage())
+	            .build();
+	    }
+	}
 
 }

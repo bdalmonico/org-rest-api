@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -184,5 +185,62 @@ public class EmpleadoResource {
 	                .build();
 	    }
 	}
+	
+
+@PUT
+@Operation(
+    summary = "Atualizar dados de um empregado",
+    description = "Atualiza um empregado existente com base no ID fornecido.",
+    responses = {
+        @ApiResponse(responseCode = "200", description = "Empregado atualizado com sucesso"),
+        @ApiResponse(responseCode = "400", description = "Erro ao atualizar o empregado"),
+        @ApiResponse(responseCode = "404", description = "Empregado não encontrado"),
+        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+    }
+)
+@Produces(MediaType.APPLICATION_JSON)
+public Response updateEmpleado(
+        @QueryParam("id") Long id,
+        @QueryParam("nombre") String nombre,
+        @QueryParam("apellido") String apellido,
+        @QueryParam("email") String email,
+        @QueryParam("fechaAlta") String fechaAltaStr,
+        @QueryParam("rolId") Integer rolId,
+        @QueryParam("contrasena") String contrasena) { // Agora aceita contraseña
+
+    try {
+        if (id == null) {
+            return Response.status(Status.BAD_REQUEST).entity("ID do empregado é obrigatório").build();
+        }
+
+        EmpleadoDTO empleado = new EmpleadoDTO();
+        empleado.setId(id);
+        empleado.setNombre(nombre);
+        empleado.setApellido(apellido);
+        empleado.setEmail(email);
+        empleado.setRolId(rolId);
+
+        if (fechaAltaStr != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            Date fechaAlta = sdf.parse(fechaAltaStr);
+            empleado.setFechaAlta(fechaAlta);
+        }
+
+        if (contrasena != null && !contrasena.isEmpty()) {
+            empleado.setContrasena(contrasena); // Atualiza a senha se fornecida
+        }
+
+        boolean atualizado = empleadoService.update(empleado);
+
+        if (atualizado) {
+            return Response.ok().entity("Empregado atualizado com sucesso").build();
+        } else {
+            return Response.status(Status.NOT_FOUND).entity("Empregado não encontrado").build();
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar o empregado").build();
+    }
+}
 
 }

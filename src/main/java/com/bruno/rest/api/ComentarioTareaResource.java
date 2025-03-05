@@ -13,8 +13,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -37,34 +39,6 @@ public class ComentarioTareaResource {
 			t.printStackTrace();
 		}
 	}
-
-//	@Path("/{id}")
-//	@GET
-//	@Produces
-//	@Operation(
-//			summary = "Busqueda por id de Comentariotarea", 
-//			description = "Recupera todos los datos de un Comentario Tarea por su id", 
-//			responses = {
-//			@ApiResponse(responseCode = "200", description = "Comentario Tarea encontrado", 
-//					content = @Content(mediaType = MediaType.APPLICATION_JSON, 
-//					schema = @Schema(implementation = ComentarioTareaDTO.class))),
-//			@ApiResponse(responseCode = "404", description = "Comentario Tarea no encontrado"),
-//			@ApiResponse(responseCode = "400", description = "Error al recuperar los datos") })
-//	public Response findComentarioTareaById(@PathParam("id") Long id) throws NumberFormatException, DataException, ServiceException {
-//		ComentarioTareaDTO p = null;
-//		try {
-//			p = comentarioTareaService.findById(id);
-//		} catch (Throwable e) {
-//
-//			e.printStackTrace();
-//		}
-//		if (p != null) {
-//			return Response.ok(p).build();
-//		} else {
-//			return Response.status(Status.BAD_REQUEST.getStatusCode(), "tarea " + id + " no encontrado").build();
-//		}
-//
-//	}
 
 	@Path("/tarea/{tareaId}")
 	@GET
@@ -133,6 +107,85 @@ public class ComentarioTareaResource {
 	        return Response.status(Status.BAD_REQUEST.getStatusCode(), e.getMessage()).build();
 	    }
 	}
+	
+	@PUT
+	@Operation(
+	    summary = "Atualizar comentário da tarefa",
+	    description = "Atualiza um comentário existente com base no ID fornecido nos query params.",
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Comentário atualizado com sucesso"),
+	        @ApiResponse(responseCode = "400", description = "Erro ao atualizar o comentário"),
+	        @ApiResponse(responseCode = "404", description = "Comentário não encontrado"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response updateComentarioTarea(
+	        @QueryParam("id") Long id,
+	        @QueryParam("comentario") String comentario,
+	        @QueryParam("empleadoId") Long empleadoId,
+	        @QueryParam("fechaHora") String fechaHoraStr,
+	        @QueryParam("tareaId") Long tareaId) {
 
+	    try {
+	        if (id == null) {
+	            return Response.status(Status.BAD_REQUEST).entity("ID do comentário é obrigatório").build();
+	        }
+
+	        ComentarioTareaDTO comentarioTarea = new ComentarioTareaDTO();
+	        comentarioTarea.setId(id);
+	        comentarioTarea.setComentario(comentario);
+	        comentarioTarea.setEmpleadoId(empleadoId);
+	        comentarioTarea.setTareaId(tareaId);
+
+	        if (fechaHoraStr != null) {
+	            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	            comentarioTarea.setFechaHora(sdf.parse(fechaHoraStr));
+	        }
+
+	        boolean atualizado = comentarioTareaService.update(comentarioTarea);
+
+	        if (atualizado) {
+	            return Response.ok().entity("Comentário atualizado com sucesso").build();
+	        } else {
+	            return Response.status(Status.NOT_FOUND).entity("Comentário não encontrado").build();
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao atualizar o comentário").build();
+	    }
+	}
+	
+	@DELETE
+	@Path("/{id}")
+	@Operation(
+	    summary = "Deletar comentário da tarefa",
+	    description = "Remove um comentário do sistema com base no ID fornecido.",
+	    responses = {
+	        @ApiResponse(responseCode = "200", description = "Comentário deletado com sucesso"),
+	        @ApiResponse(responseCode = "400", description = "Erro ao deletar o comentário"),
+	        @ApiResponse(responseCode = "404", description = "Comentário não encontrado"),
+	        @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
+	    }
+	)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response deleteComentarioTarea(@PathParam("id") Long id) {
+	    try {
+	        if (id == null) {
+	            return Response.status(Status.BAD_REQUEST).entity("ID do comentário é obrigatório").build();
+	        }
+
+	        boolean deletado = comentarioTareaService.delete(id);
+
+	        if (deletado) {
+	            return Response.ok().entity("Comentário deletado com sucesso").build();
+	        } else {
+	            return Response.status(Status.NOT_FOUND).entity("Comentário não encontrado").build();
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao deletar o comentário").build();
+	    }
+	}
 
 }
